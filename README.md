@@ -1,4 +1,5 @@
 ### Model Performance
+- <img width="501" alt="image" src="https://github.com/VM230705/DM_Final_Project/assets/70795071/bf1ad70b-128e-4fbc-9775-923198c709de">
 #### Before handling text features: 
 1. Logistic Regression:
    - Cross-Validation Scores: [0.863, 0.871, 0.857, 0.855, 0.865]
