@@ -151,7 +151,7 @@ def generate_csv(filename):
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option(
-        '-f', dest='fin', type=str, help='csv file path', default='./dataset/train.csv'
+        '-f', dest='fin', type=str, help='csv file path', default='train.csv'
     )
     options, args = parser.parse_args()
     data = pd.read_csv(options.fin, encoding='latin-1')
