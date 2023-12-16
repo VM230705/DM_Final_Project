@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Correlation Matrix</title>
+  <script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
+  <style>
+    .title{
+      font: bold 36px sans-serif;
+      fill: #555555;
+    }
+    .axis{
+      font: 14px sans-serif;
+    }
+    .block text{
+      fill: #fff;
+      font: 14px sans-serif;
+      text-shadow:
+        -1px -1px 1px #000,
+        1px -1px 1px #000,
+        -1px 1px 1px #000,
+        1px 1px 1px #000;
+    }
+  </style>
+</head>
+<body>
+  <svg width="1200" height="750"></svg>
+  <div style="position:fixed; left:20px; bottom:20px; font: bold 24px sans-serif;">
+    <input type="file" onchange="loadFile(this.files[0])" accept=".csv" style="font: 20px sans-serif;">
+  </div>
+  <script>"use strict"; async function loadFile(file){
+    
+    const width = d3.select("svg").attr("width")*1.0;
+    const padding = width*0.0625;
+
+
+    function boolToNum(x){
+      return (!isNaN(x)) ? Number(x) : ((x == "TRUE") ? 1 : 0);
+    }
+
+
+    function getCorrelationMatrix(data){
+      const S = [];
+      const sum = [];
+      for(let i=0; i<data.length; i++){
+        sum[i] = d3.sum(data[i]);
+      }
+
+      const len = data[0].length;
+      for(let i=0; i<data.length; i++){
+        S.push([]);
+        for(let j=0; j<data.length; j++){
+          let dot = 0;
+          for(let k=0; k<len; k++){
+            dot += data[i][k] * data[j][k];
+          }
+          S[i].push(len*dot - sum[i]*sum[j]);
+        }
+      }
+
+      const matrix = [];
+      const getR = (a, b) => S[a][b] / (Math.sqrt(computeS(x, x)) * Math.sqrt(computeS(y, y)));
+      for(let i=0; i<data.length; i++){
+        matrix.push([]);
+        for(let j=0; j<data.length; j++){
+          matrix[i].push( S[i][j] / (Math.sqrt(S[i][i])*Math.sqrt(S[j][j])) );
+        }
+      }
+      console.log(sum);
+      console.log(matrix);
+      return matrix;
+    }
+
+
+    function drawMatrix(matrix, names, colorScale, x=200, y=100, blockSize=50){
+      const nameClass = names.map((str)=>str.toLocaleLowerCase().replaceAll('_', '-'));
+      const mat = d3.select("svg")
+        .append("g")
+        .attr("id", "mat")
+        .attr("transform", `translate(${x}, ${y})`);
+      
+      const len = matrix.length;
+      for(let i=0; i<len; i++){
+        for(let j=0; j<len; j++){
+          const block = mat.append("g")
+            .attr("class", "block " + "row-"+nameClass[i] + " " + "col-"+nameClass[j])
+            .attr("transform", `translate(${blockSize*j}, ${blockSize*i})`);
+          block.append("rect")
+            .attr("width", blockSize)
+            .attr("height", blockSize)
+            .attr("fill", colorScale(matrix[i][j]));
+          block.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central") 
+            .attr("transform", `translate(${blockSize/2}, ${blockSize/2})`)
+            .text((Math.round(matrix[i][j]*100)/100).toString());
+        }
+      }
+      return blockSize;
+    }
+
+
+    function addAxis(names, blockSize){
+      const nameClass = names.map((str)=>str.toLocaleLowerCase().replaceAll('_', '-'));
+      const matTranslate = d3.select("#mat").attr("transform");
+      const matLeft = Number(matTranslate.split(",")[0].split("(")[1]);
+      const matTop = Number(matTranslate.split(",")[1].split(")")[0]);
+
+      const len = names.length;
+      const leftAxis = d3.select("svg")
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(${matLeft}, ${matTop})`);
+      const bottomAxis = d3.select("svg")
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(${matLeft}, ${matTop+blockSize*len})`);
+
+      for(let i=0; i<len; i++){
+        leftAxis.append("text")
+          .attr("class", "response " + "row-"+nameClass[i])
+          .attr("text-anchor", "end")
+          .attr("dominant-baseline", "central")
+          .attr("transform", `translate(0, ${blockSize*(i+0.5)})`)
+          .text(names[i] + " -");
+        bottomAxis.append("text")
+          .attr("class", "response " + "col-"+nameClass[i])
+          .attr("text-anchor", "end")
+          .attr("dominant-baseline", "central")
+          .attr("transform", `translate(${blockSize*(i+0.5)}, 0) rotate(-90)`)
+          .text(names[i] + " -");
+      }
+      const matRight = matLeft + blockSize * len;
+      return {matTop, matRight};
+    }
+
+
+    function addLegend({matTop, matRight}, colorScale){
+      const defs = d3.select("svg").append("defs");
+      const grad1 = defs.append("linearGradient")
+        .attr("id", "matColorGrad1")
+        .attr("x1", "0%")
+        .attr("x2", "0%")
+        .attr("y1", "0%")
+        .attr("y2", "100%");
+      grad1.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", colorScale.range()[2])
+        .attr("stop-opacity", 1);
+      grad1.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", colorScale.range()[1])
+        .attr("stop-opacity", 1);
+      const grad2 = defs.append("linearGradient")
+        .attr("id", "matColorGrad2")
+        .attr("x1", "0%")
+        .attr("x2", "0%")
+        .attr("y1", "0%")
+        .attr("y2", "100%");
+      grad2.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", colorScale.range()[1])
+        .attr("stop-opacity", 1);
+      grad2.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", colorScale.range()[0])
+        .attr("stop-opacity", 1);
+
+      const legend = d3.select("svg")
+        .append("g")
+        .attr("transform", `translate(${matRight+50}, ${matTop+70})`);
+      legend.append("rect")
+        .attr("width", 20)
+        .attr("height", 100)
+        .attr("fill", "url(#matColorGrad1)")
+        .attr("transform", `translate(0, 15)`);
+      legend.append("rect")
+        .attr("width", 20)
+        .attr("height", 100)
+        .attr("fill", "url(#matColorGrad2)")
+        .attr("transform", `translate(0, 115)`);
+      legend.append("text")
+        .attr("transform", `translate(10, 0)`)
+        .attr("style", "font: bold 18px sans-serif")
+        .attr("text-anchor", "middle")
+        .text("corr");
+      for(let x of ["1.0", "0.0", "-1.0"]){
+        legend.append("text")
+          .attr("transform", `translate(30, ${15 + x*(-100)+100})`)
+          .attr("style", "font: bold 14px sans-serif")
+          .attr("dominant-baseline", "central")
+          .text(x);
+      }
+    }
+
+
+    function makeInteract(names){
+      const nameClass = names.map((str)=>str.toLocaleLowerCase().replaceAll('_', '-'));
+      for(let str1 of nameClass){
+        for(let str2 of nameClass){
+          d3.selectAll(".block.row-"+str1+".col-"+str2).on("mouseover", function(){
+            const block = d3.select(this).raise();
+            block.select("rect")
+              .attr("stroke", "red")
+              .attr("stroke-width", "2px");
+            d3.select(".response.row-"+str1)
+              .attr("fill", "red")
+              .attr("style", "font: bold 16px sans-serif;");
+            d3.select(".response.col-"+str2)
+              .attr("fill", "red")
+              .attr("style", "font: bold 16px sans-serif;");
+          });
+          d3.selectAll(".block.row-"+str1+".col-"+str2).on("mouseleave", function(){
+            const block = d3.select(this).lower();
+            block.select("rect")
+              .attr("stroke", "none");
+            d3.select(".response.row-"+str1)
+              .attr("fill", "black")
+              .attr("style", "font: 14px sans-serif;");
+            d3.select(".response.col-"+str2)
+              .attr("fill", "black")
+              .attr("style", "font: 14px sans-serif;");
+          });
+        }
+      }
+    }
+
+
+    let drop = 0;
+    let total = 0;
+    const data = [];
+    const names = [
+      "rating",
+      "review_count",
+      "urgently_hiring",
+      "dradis_job",
+      "new_job",
+      "sponsored",
+      "featured_employer",
+      "indeed_applyable",
+      "indeed_apply_enabled"
+    ];
+    for(let row of d3.csvParse(await file.text())){
+      total += 1;
+      if(row["rating"] == "0" || row["review_count"] == "0"){
+        drop += 1;
+        continue;
+      }
+      data.push(names.map(name=>boolToNum(row[name])));
+    }
+    console.log(`Total rows: ${total}`);
+    console.log(`Drop rows: ${drop}`);
+    console.log(data);
+
+
+    d3.select("svg")
+      .append("text")
+      .attr("x", 400)
+      .attr("y", 60)
+      .attr("class", "title")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .text("EDA - Correlation Matrix");
+    
+
+    const M = getCorrelationMatrix(d3.zip(...data));
+    const colorScale = d3.scaleLinear().domain([-1, 0, 1]).range(["#902000", "#ffffff", "#002090"]);
+    const {matTop, matRight} = addAxis(names, drawMatrix(M, names, colorScale));
+    addLegend({matTop, matRight}, colorScale);
+    makeInteract(names);
+
+  };</script>
+</body>
+</html>
