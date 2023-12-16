@@ -91,6 +91,10 @@
     | **Actual Low**      | 48             | 493           | 58               |
     | **Actual Medium**   | 49             | 35            | 1019             |
 
+#### Combining Regression output as a feature
+<img width="537" alt="image" src="https://github.com/VM230705/DM_Final_Project/assets/77866896/a4758a69-9eea-4e3f-ba1a-1ac6fe1fbad7">
+
+
 ### Observations:
 1.	Company Feature Impact:
 The 'company' feature has a substantial positive impact on Logistic Regression, Decision Tree, and Random Forest models, resulting in significant accuracy improvements.
