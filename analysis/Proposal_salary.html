@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Correlation Matrix</title>
+  <script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
+  <style>
+    .title{
+      font: bold 36px sans-serif;
+      fill: #555555;
+    }
+    .label{
+      font: 24px sans-serif;
+      fill: #555555;
+    }
+    .axis{
+      font: 14px sans-serif;
+    }
+    .block text{
+      fill: #fff;
+      font: 14px sans-serif;
+      text-shadow:
+        -1px -1px 1px #000,
+        1px -1px 1px #000,
+        -1px 1px 1px #000,
+        1px 1px 1px #000;
+    }
+  </style>
+</head>
+<body>
+  <svg width="1200" height="700"></svg>
+  <div style="position:fixed; left:20px; bottom:20px; font: bold 24px sans-serif;">
+    <input type="file" onchange="loadFile(this.files[0])" accept=".csv" style="font: 20px sans-serif;">
+  </div>
+  <script>"use strict"; async function loadFile(file){
+    
+    const svg = d3.select("svg");
+    const width = svg.attr("width")*1.0;
+    const padding = width*0.0625;
+    const plotStartX = width*0.3;
+    const plotStartY = width*0.12;
+    const plotWidth = width*0.65;
+    const plotHeight = width*0.35;
+
+
+    let drop = 0;
+    let total = 0;
+    let w = 0;
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    const data = [];
+    const lowSalary = [];
+    const highSalary = [];
+    for(let row of d3.csvParse(await file.text())){
+      total += 1;
+      const salary = row["salary"].toLowerCase();
+      if(!salary.includes("year")){
+        drop += 1;
+        continue;
+      }
+      
+      data.push(salary);
+      if(salary.includes('-')){
+        const tmp1 = Number(salary.split(' ')[0].replace(/[^0-9.-]+/g,""));
+        const tmp2 = Number(salary.split(' ')[2].replace(/[^0-9.-]+/g,""))
+        lowSalary.push(tmp1);
+        highSalary.push(tmp2);
+        w += 1;
+      }
+      else if(salary.includes('from')){
+        //lowSalary.push(Number(salary.split(' ')[1].replace(/[^0-9.-]+/g,"")));
+        x += 1;
+      }
+      else if(salary.includes('up')){
+        //highSalary.push(Number(salary.split(' ')[2].replace(/[^0-9.-]+/g,"")));
+        y += 1;
+      }
+      else{
+        //lowSalary.push(Number(salary.split(' ')[0].replace(/[^0-9.-]+/g,"")));
+        //highSalary.push(Number(salary.split(' ')[0].replace(/[^0-9.-]+/g,"")));
+        z += 1;
+      }
+    }
+    console.log(`Total rows: ${total}`);
+    console.log(`Drop rows: ${drop}`);
+    console.log(data);
+
+    console.log(`range:${w}, from:${x}, up:${y}, fixed:${z}`);
+    console.log(lowSalary);
+    console.log(highSalary);
+
+
+    d3.select("svg")
+      .append("text")
+      .attr("x", plotStartX+plotWidth/2)
+      .attr("y", padding)
+      .attr("class", "title")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .text("EDA - Salary");
+
+
+    const plot = svg.append("g")
+      .attr("transform", `translate(${plotStartX}, ${plotStartY})`)
+    
+    
+    const xScale = d3.scaleLinear()
+      .domain(d3.extent(lowSalary))
+      .range([0, plotWidth]);
+    
+    const yScale = d3.scaleLinear()
+      .domain(d3.extent(highSalary))
+      .range([plotHeight, 0]);
+
+    plot.append("g")
+      .attr("class", "axis x")
+      .attr("transform", `translate(0, ${plotHeight})`)
+      .call(d3.axisBottom(xScale).ticks(10).tickPadding(10));
+    
+    plot.append("g")
+      .attr("class", "axis y")
+      .call(d3.axisLeft(yScale).ticks(10).tickPadding(10));
+
+    
+    for(let i=0; i<lowSalary.length; i++){
+      plot.append("circle")
+        .attr("fill", "orange")
+        .attr("fill-opacity", 0.3)
+        .attr("cx", xScale(lowSalary[i]))
+        .attr("cy", yScale(highSalary[i]))
+        .attr("r", 5);
+
+    d3.select("svg")
+      .append("text")
+        .attr("class", "label")
+        .attr("x", plotStartX+plotWidth/2)
+        .attr("y", plotStartY+plotHeight*1.15)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")
+        .text("Salary (min)");
+
+    d3.select("svg")
+      .append("text")
+        .attr("class", "label")
+        .attr("transform", `translate(${plotStartX*0.7}, ${plotStartY+plotHeight/2}) rotate(-90)`)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "central")
+        .text("Salary (max)");
+    }
+  };</script>
+</body>
+</html>
