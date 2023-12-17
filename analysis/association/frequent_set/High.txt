@@ -1,0 +1,16 @@
+Size = 1
+....('indeed_applyable',)
+....('sponsored',)
+....('job_type_Full-time',)
+....('dradis_job',)
+Size = 2
+....('indeed_applyable', 'dradis_job')
+....('sponsored', 'indeed_applyable')
+....('sponsored', 'dradis_job')
+....('job_type_Full-time', 'indeed_applyable')
+....('job_type_Full-time', 'sponsored')
+....('job_type_Full-time', 'dradis_job')
+Size = 3
+....('job_type_Full-time', 'indeed_applyable', 'dradis_job')
+....('job_type_Full-time', 'sponsored', 'dradis_job')
+....('job_type_Full-time', 'sponsored', 'indeed_applyable')
