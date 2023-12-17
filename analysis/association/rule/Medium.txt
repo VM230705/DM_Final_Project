@@ -1,0 +1,12 @@
+0.981: {'sponsored', 'indeed_applyable'} => {'job_type_Full-time'}
+0.978: {'job_type_Full-time', 'sponsored'} => {'indeed_applyable'}
+0.976: {'indeed_applyable'} => {'job_type_Full-time'}
+0.956: {'job_type_Full-time'} => {'indeed_applyable'}
+0.861: {'job_type_Full-time', 'indeed_applyable'} => {'sponsored'}
+0.856: {'indeed_applyable'} => {'sponsored'}
+0.852: {'sponsored'} => {'job_type_Full-time'}
+0.849: {'sponsored'} => {'indeed_applyable'}
+0.842: {'job_type_Full-time'} => {'sponsored'}
+0.840: {'indeed_applyable'} => {'job_type_Full-time', 'sponsored'}
+0.833: {'sponsored'} => {'job_type_Full-time', 'indeed_applyable'}
+0.823: {'job_type_Full-time'} => {'sponsored', 'indeed_applyable'}

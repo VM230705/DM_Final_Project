@@ -1,0 +1,12 @@
+Size = 1
+....('job_type_Full-time',)
+....('hires_needed_na',)
+....('sponsored',)
+....('indeed_applyable',)
+....('no_postal',)
+Size = 2
+....('job_type_Full-time', 'indeed_applyable')
+....('sponsored', 'indeed_applyable')
+....('job_type_Full-time', 'sponsored')
+Size = 3
+....('job_type_Full-time', 'sponsored', 'indeed_applyable')
