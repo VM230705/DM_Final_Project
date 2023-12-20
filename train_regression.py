@@ -108,6 +108,7 @@ if __name__ == '__main__':
         find_parameters()
 
     models = []
+    train_pred = np.zeros(len(y))
     MSE, RMSE, MAE, MAPE, R2 = [], [], [], [], []
     for train_idx, valid_idx in kf.split(X, y):
         X_train, y_train = X[train_idx], y[train_idx]
@@ -121,6 +122,7 @@ if __name__ == '__main__':
         MAPE.append(mean_absolute_percentage_error(y_valid, pred))
         R2.append(r2_score(y_valid, pred))
         models.append(model)
+        train_pred[np.array(valid_idx)] = pred
 
     show = 4
     print("Valid Score-")
@@ -149,10 +151,14 @@ if __name__ == '__main__':
 
     if options.out:
         head, _ = os.path.split(options.test)
-        output_name = os.path.join(head, 'min_salary_predict.csv')
-        y_pred_df = pd.DataFrame(y_pred, columns=['min_salary_predict'])
-        y_pred_df.to_csv(output_name, index=False, encoding='latin-1')
-        print(f'Write prediction file to {output_name}\n')
+        output_name_1 = os.path.join(head, 'min_salary_predict_train.csv')
+        output_name_2 = os.path.join(head, 'min_salary_predict_test.csv')
+        y_pred_df_1 = pd.DataFrame(train_pred, columns=['min_salary_predict'])
+        y_pred_df_2 = pd.DataFrame(y_pred, columns=['min_salary_predict'])
+        y_pred_df_1.to_csv(output_name_1, index=False, encoding='latin-1')
+        y_pred_df_2.to_csv(output_name_2, index=False, encoding='latin-1')
+        print(f'Write prediction file to {output_name_1}\n')
+        print(f'Write prediction file to {output_name_2}\n')
 
     if options.shap:
         explainer = shap.Explainer(test_model)

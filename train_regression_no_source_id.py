@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     # train
     train_df = pd.read_csv(options.train, encoding='latin-1')
-    train_df.drop(['title', 'snippet', 'company'], inplace=True, axis=1)
+    train_df.drop(['source_id', 'title', 'snippet', 'company'], inplace=True, axis=1)
     X = train_df.drop(['salary_min', 'salary_max'], axis=1).to_numpy(dtype=float)
     y = train_df['salary_min'].to_numpy()
     kf = KFold(n_splits=5)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     # test
     test_df = pd.read_csv(options.test, encoding='latin-1')
-    test_df.drop(['title', 'snippet', 'company'], inplace=True, axis=1)
+    test_df.drop(['source_id', 'title', 'snippet', 'company'], inplace=True, axis=1)
     X_test = test_df.drop(['salary_min', 'salary_max'], axis=1).to_numpy(dtype=float)
     y_test = test_df['salary_min'].to_numpy()
 
@@ -157,7 +157,7 @@ if __name__ == '__main__':
         y_pred_df_2 = pd.DataFrame(y_pred, columns=['min_salary_predict'])
         y_pred_df_1.to_csv(output_name_1, index=False, encoding='latin-1')
         y_pred_df_2.to_csv(output_name_2, index=False, encoding='latin-1')
-        print(f'Write prediction file to {output_name_1}\n')
+        print(f'Write prediction file to {output_name_1}')
         print(f'Write prediction file to {output_name_2}\n')
 
     if options.shap:
